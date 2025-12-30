@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import {
   FaWallet,
   FaChartLine,
-  FaPeopleGroup,
+
   FaChevronDown,
   FaChevronUp,
   FaArrowDown,
@@ -18,9 +17,10 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 import { IoIosArrowForward } from "react-icons/io";
+import { FaPeopleGroup } from "react-icons/fa6";
 import url from "@/app/utils/urls/BaseUrl";
 
-// --- Types ---
+
 interface Group {
   _id: string;
   group_name: string;
@@ -54,11 +54,12 @@ const Colors = {
   accentColor: "#3498DB",
 };
 
-const MyGroups = () => {
+const MyGroups = ({params}:{params:Promise<{userId:string}>}) => {
   const router = useRouter();
+  const userIdData = use(params);
 
-  // User ID - replace with real auth context
-  const userId = "mock-user-id";
+ 
+  const userId = userIdData.userId;
 
   const [cardsData, setCardsData] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +72,6 @@ const MyGroups = () => {
   const scrollViewRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // --- Format Number (Indian Style) ---
   const formatNumberIndianStyle = (num: number | string | null | undefined): string => {
     if (num === null || num === undefined) return "0";
     const safeNum = isNaN(parseFloat(num as string)) ? 0 : parseFloat(num as string);
@@ -141,10 +141,13 @@ const MyGroups = () => {
       });
       setIndividualGroupReports(reportsMap);
     } catch (error) {
-      console.error("Error fetching overview:", error);
+      if(error instanceof AxiosError){
+ console.error("Error fetching overview:", error);
       if (error.response?.status !== 404) {
         toast.error("Failed to load group summary");
       }
+      }
+     
     }
   }, [userId]);
 

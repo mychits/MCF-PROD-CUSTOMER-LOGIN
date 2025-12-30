@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import {
   FaBars,
   FaWhatsapp,
@@ -83,11 +82,12 @@ interface ReviewItem {
   location: string;
 }
 
-const Home = () => {
+const Home = ({params}:{params:Promise<{userId:string}>}) => {
   const router = useRouter();
+  const userIdData = use(params);
 
-  // User context simulation (in real app, use your own context or auth system)
-  const userId = "mock-user-id"; // Replace with actual user ID from auth context
+
+  const userId = userIdData.userId; // Replace with actual user ID from auth context
   const [userData, setUserData] = useState<UserData>({ full_name: "", phone_number: "", address: "" });
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
   const [relationshipManagers, setRelationshipManagers] = useState<RelationshipManager[]>([]);
@@ -198,15 +198,15 @@ const Home = () => {
   ];
 
   const services: ServiceItem[] = [
-    { navigateTo: "mygroups", icon: "group", title: "My Groups", bgColor: "#E8F5E9", iconBg: "#2E7D32", disabled: false },
-    { navigateTo: "enroll", screen: "EnrollScreenMain", icon: "group-add", title: "New Groups", bgColor: "#E3F2FD", iconBg: "#053B90", filter: "New Groups", disabled: false },
-    { navigateTo: "passbook", icon: "book", title: "My Passbook", bgColor: "#E0F7FA", iconBg: "#006064", disabled: false },
-    { navigateTo: "report", icon: "bar-chart", title: "My Pigmy", bgColor: "#F3E5F5", iconBg: "#7c36a8ff", disabled: false },
-    { navigateTo: "payment", icon: "payment", title: "My Payments", bgColor: "#FFF3E0", iconBg: "#EF6C00", disabled: false },
-    { navigateTo: "auction", icon: "gavel", title: "Auction", bgColor: "#F1F8E9", iconBg: "#558B2F", disabled: false, featureTitle: "Auction" },
-    { navigateTo: "loan", screen: "MyLoan", icon: "wallet", title: "My Loan", bgColor: "#EDE7F6", iconBg: "#3e09a7ff", filter: "My Loan", disabled: false },
-    { navigateTo: "refer", icon: "person-add", title: "Refer Now", bgColor: "#FFFDE7", iconBg: "#F9A825", disabled: false },
-    { navigateTo: "dues", icon: "rupee", title: "Pay Your Dues", bgColor: "#FFEBEE", iconBg: "#B71C1C", disabled: false },
+    { navigateTo: `my-groups/${userId}`, icon: "group", title: "My Groups", bgColor: "#E8F5E9", iconBg: "#2E7D32", disabled: false },
+    { navigateTo: `enroll/${userId}`, screen: "EnrollScreenMain", icon: "group-add", title: "New Groups", bgColor: "#E3F2FD", iconBg: "#053B90", filter: "New Groups", disabled: false },
+    { navigateTo: `passbook/${userId}`, icon: "book", title: "My Passbook", bgColor: "#E0F7FA", iconBg: "#006064", disabled: false },
+    { navigateTo: `report/${userId}`, icon: "bar-chart", title: "My Pigmy", bgColor: "#F3E5F5", iconBg: "#7c36a8ff", disabled: false },
+    { navigateTo: `payment/${userId}`, icon: "payment", title: "My Payments", bgColor: "#FFF3E0", iconBg: "#EF6C00", disabled: false },
+    { navigateTo: `auction/${userId}`, icon: "gavel", title: "Auction", bgColor: "#F1F8E9", iconBg: "#558B2F", disabled: false, featureTitle: "Auction" },
+    { navigateTo: `loan/${userId}`, screen: "MyLoan", icon: "wallet", title: "My Loan", bgColor: "#EDE7F6", iconBg: "#3e09a7ff", filter: "My Loan", disabled: false },
+    { navigateTo: `refer/${userId}`, icon: "person-add", title: "Refer Now", bgColor: "#FFFDE7", iconBg: "#F9A825", disabled: false },
+    { navigateTo: `dues/${userId}`, icon: "rupee", title: "Pay Your Dues", bgColor: "#FFEBEE", iconBg: "#B71C1C", disabled: false },
   ];
 
   const mychitsAdvantages: AdvantageItem[] = [
@@ -257,10 +257,10 @@ const Home = () => {
         
         {/* Desktop Menu Items */}
         <nav className="hidden lg:flex items-center gap-6">
-          <button onClick={() => router.push("/mygroups")} className="hover:text-blue-200 transition-colors">My Groups</button>
-          <button onClick={() => router.push("/enroll")} className="hover:text-blue-200 transition-colors">New Groups</button>
-          <button onClick={() => router.push("/auction")} className="hover:text-blue-200 transition-colors">Auction</button>
-          <button onClick={() => router.push("/profile")} className="hover:text-blue-200 transition-colors">Profile</button>
+          <button onClick={() => router.push(`/my-groups/${userId}`)} className="hover:text-blue-200 transition-colors">My Groups</button>
+          <button onClick={() => router.push(`/enroll/${userId}`)} className="hover:text-blue-200 transition-colors">New Groups</button>
+          <button onClick={() => router.push(`/auction/${userId}`)} className="hover:text-blue-200 transition-colors">Auction</button>
+          <button onClick={() => router.push(`/profile/${userId}`)} className="hover:text-blue-200 transition-colors">Profile</button>
         </nav>
         
         <button
