@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
@@ -57,11 +57,11 @@ const PURPOSE_OPTIONS = ["Personal", "Medical", "Education", "Business", "Others
 const CONTACT_EMAIL = "info.mychits@gmail.com";
 const CONTACT_PHONE = "+919483900777";
 
-const MyLoan = () => {
+const MyLoan = ({params}:{params:Promise<{userId:string}>}) => {
   const router = useRouter();
 
   // User ID - replace with real auth logic
-  const userId = "mock-user-id";
+  const userId = use(params);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

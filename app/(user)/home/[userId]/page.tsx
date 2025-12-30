@@ -200,11 +200,11 @@ const Home = ({params}:{params:Promise<{userId:string}>}) => {
   const services: ServiceItem[] = [
     { navigateTo: `my-groups/${userId}`, icon: "group", title: "My Groups", bgColor: "#E8F5E9", iconBg: "#2E7D32", disabled: false },
     { navigateTo: `enroll/${userId}`, screen: "EnrollScreenMain", icon: "group-add", title: "New Groups", bgColor: "#E3F2FD", iconBg: "#053B90", filter: "New Groups", disabled: false },
-    { navigateTo: `passbook/${userId}`, icon: "book", title: "My Passbook", bgColor: "#E0F7FA", iconBg: "#006064", disabled: false },
+    { navigateTo: `my-passbook/${userId}`, icon: "book", title: "My Passbook", bgColor: "#E0F7FA", iconBg: "#006064", disabled: false },
     { navigateTo: `report/${userId}`, icon: "bar-chart", title: "My Pigmy", bgColor: "#F3E5F5", iconBg: "#7c36a8ff", disabled: false },
     { navigateTo: `payment/${userId}`, icon: "payment", title: "My Payments", bgColor: "#FFF3E0", iconBg: "#EF6C00", disabled: false },
     { navigateTo: `auction/${userId}`, icon: "gavel", title: "Auction", bgColor: "#F1F8E9", iconBg: "#558B2F", disabled: false, featureTitle: "Auction" },
-    { navigateTo: `loan/${userId}`, screen: "MyLoan", icon: "wallet", title: "My Loan", bgColor: "#EDE7F6", iconBg: "#3e09a7ff", filter: "My Loan", disabled: false },
+    { navigateTo: `my-loan/${userId}`, screen: "MyLoan", icon: "wallet", title: "My Loan", bgColor: "#EDE7F6", iconBg: "#3e09a7ff", filter: "My Loan", disabled: false },
     { navigateTo: `refer/${userId}`, icon: "person-add", title: "Refer Now", bgColor: "#FFFDE7", iconBg: "#F9A825", disabled: false },
     { navigateTo: `dues/${userId}`, icon: "rupee", title: "Pay Your Dues", bgColor: "#FFEBEE", iconBg: "#B71C1C", disabled: false },
   ];
