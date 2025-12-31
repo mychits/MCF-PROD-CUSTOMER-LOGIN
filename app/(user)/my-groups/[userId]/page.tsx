@@ -2,23 +2,23 @@
 
 import React, { useState, useEffect, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import {
   FaWallet,
   FaChartLine,
-  FaChevronDown,
-  FaChevronUp,
-  FaArrowDown,
   FaHourglassHalf,
   FaCheckCircle,
   FaTrashAlt,
-  FaArrowRight,
+  FaArrowLeft,
+  FaSearch,
+  FaInfoCircle,
 } from "react-icons/fa";
 import { IoIosArrowForward } from "react-icons/io";
 import { FaPeopleGroup } from "react-icons/fa6";
 import url from "@/app/utils/urls/BaseUrl";
 
+// --- Types ---
 interface Group {
   _id: string;
   group_name: string;
@@ -42,488 +42,320 @@ interface GroupReport {
   totalProfit: number;
 }
 
-// --- Constants ---
-const Colors = {
-  primaryBlue: "#053B90",
-  secondaryBlue: "#0C53B3",
-  warningText: "#F39C12",
-  completedText: "#27AE60",
-  removedText: "#E74C3C",
-  accentColor: "#3498DB",
-};
-
 const MyGroups = ({ params }: { params: Promise<{ userId: string }> }) => {
   const router = useRouter();
   const userIdData = use(params);
-
   const userId = userIdData.userId;
 
   const [cardsData, setCardsData] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPaid, setTotalPaid] = useState<number | null>(null);
   const [totalProfit, setTotalProfit] = useState<number | null>(null);
-  const [individualGroupReports, setIndividualGroupReports] = useState<
-    Record<string, GroupReport>
-  >({});
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const [highlightedCardIndex, setHighlightedCardIndex] = useState<
-    number | null
-  >(null);
+  const [individualGroupReports, setIndividualGroupReports] = useState<Record<string, GroupReport>>({});
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const scrollViewRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const formatNumberIndianStyle = (
-    num: number | string | null | undefined
-  ): string => {
-    if (num === null || num === undefined) return "0";
-    const safeNum = isNaN(parseFloat(num as string))
-      ? 0
-      : parseFloat(num as string);
+  const formatCurrency = (num: number | string | null | undefined) => {
+    const value = typeof num === "string" ? parseFloat(num) : num ?? 0;
     return new Intl.NumberFormat("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(safeNum);
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(value);
   };
 
   const fetchTickets = useCallback(async () => {
-    if (!userId) {
-      setLoading(false);
-      setCardsData([]);
-      return;
-    }
+    if (!userId) return;
     try {
-      const response = await axios.get(
-        `${url}/enroll/mobile-enrolls/users/${userId}`
-      );
+      const response = await axios.get(`${url}/enroll/mobile-enrolls/users/${userId}`);
       const responseData = response.data.data || [];
       let allCards: Card[] = [];
 
       responseData.forEach((groupBlock: any) => {
         if (groupBlock.mobileAppEnrolls?.length > 0) {
-          const mobileCards = groupBlock.mobileAppEnrolls.map((card: any) => ({
-            ...card,
-            tickets: card.no_of_tickets,
-            isPendingApproval: true,
-          }));
-          allCards.push(...mobileCards);
+          allCards.push(...groupBlock.mobileAppEnrolls.map((c: any) => ({ ...c, tickets: c.no_of_tickets, isPendingApproval: true })));
         }
         if (groupBlock.enrollments?.length > 0) {
-          const approvedCards = groupBlock.enrollments.map((card: any) => ({
-            ...card,
-            isPendingApproval: false,
-          }));
-          allCards.push(...approvedCards);
+          allCards.push(...groupBlock.enrollments.map((c: any) => ({ ...c, isPendingApproval: false })));
         }
       });
-
       setCardsData(allCards);
     } catch (error) {
-      console.error("Error fetching tickets:", error);
       toast.error("Failed to load groups");
-      setCardsData([]);
     }
   }, [userId]);
 
   const fetchAllOverview = useCallback(async () => {
     if (!userId) return;
     try {
-      const response = await axios.post(
-        `${url}/enroll/get-user-tickets-report/${userId}`
-      );
+      const response = await axios.post(`${url}/enroll/get-user-tickets-report/${userId}`);
       const data = response.data;
-
-      setTotalPaid(
-        data.reduce(
-          (sum: number, g: any) => sum + (g?.payments?.totalPaidAmount || 0),
-          0
-        )
-      );
-      setTotalProfit(
-        data.reduce(
-          (sum: number, g: any) => sum + (g?.profit?.totalProfit || 0),
-          0
-        )
-      );
+      setTotalPaid(data.reduce((sum: number, g: any) => sum + (g?.payments?.totalPaidAmount || 0), 0));
+      setTotalProfit(data.reduce((sum: number, g: any) => sum + (g?.profit?.totalProfit || 0), 0));
 
       const reportsMap: Record<string, GroupReport> = {};
       data.forEach((groupReport: any) => {
-        if (
-          groupReport.enrollment?.group &&
-          groupReport.enrollment.tickets !== undefined
-        ) {
-          const key = `${
-            groupReport.enrollment.group._id || groupReport.enrollment.group
-          }-${groupReport.enrollment.tickets}`;
-          reportsMap[key] = {
-            totalPaid: groupReport.payments?.totalPaidAmount || 0,
-            totalProfit: groupReport.profit?.totalProfit || 0,
-          };
-        }
+        const key = `${groupReport.enrollment.group._id || groupReport.enrollment.group}-${groupReport.enrollment.tickets}`;
+        reportsMap[key] = {
+          totalPaid: groupReport.payments?.totalPaidAmount || 0,
+          totalProfit: groupReport.profit?.totalProfit || 0,
+        };
       });
       setIndividualGroupReports(reportsMap);
     } catch (error) {
-      if (error instanceof AxiosError) {
-        console.error("Error fetching overview:", error);
-        if (error.response?.status !== 404) {
-          toast.error("Failed to load group summary");
-        }
-      }
+      console.error(error);
     }
   }, [userId]);
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      if (userId) {
-        await Promise.all([fetchTickets(), fetchAllOverview()]);
-      } else {
-        setCardsData([]);
-        setTotalPaid(null);
-        setTotalProfit(null);
-      }
+      await Promise.all([fetchTickets(), fetchAllOverview()]);
       setLoading(false);
     };
     loadData();
   }, [userId, fetchTickets, fetchAllOverview]);
 
-  const filteredCards = cardsData.filter((card) => card.group_id !== null);
-  const activeCards = filteredCards.filter(
-    (c) => !c.deleted && !c.isPendingApproval
+  const filteredCards = cardsData.filter(card => 
+    card.group_id?.group_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const cardsToRender = filteredCards.filter((c) => !c.deleted);
 
   const handleScrollToCard = (index: number) => {
-    const card = cardsToRender[index];
-    if (card.isPendingApproval) return;
-
-    const cardElement = cardRefs.current[`card-${index}`];
-    if (cardElement && scrollViewRef.current) {
-      const offsetTop = cardElement.offsetTop - 100;
-      scrollViewRef.current.scrollTo({ top: offsetTop, behavior: "smooth" });
-      setHighlightedCardIndex(index);
-      setExpandedIndex(null);
-      setTimeout(() => setHighlightedCardIndex(null), 3000);
-    }
-  };
-
-  const handleCardPress = (groupId: string, ticket: number) => {
-    router.push(`/enroll/group?groupId=${groupId}&ticket=${ticket}`);
-  };
-
-  const toggleAccordion = (index: number) => {
-    setExpandedIndex(expandedIndex === index ? null : index);
-  };
-
-  const calculatePaidPercentage = (
-    groupValue: number,
-    paidAmount: number
-  ): number => {
-    if (!groupValue || !paidAmount) return 0;
-    return Math.min(100, Math.round((paidAmount / groupValue) * 100));
+    cardRefs.current[`card-${index}`]?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-800"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#F0F7FF]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600 border-r-transparent"></div>
+          <p className="text-blue-900 font-semibold animate-pulse">Loading secure data...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-blue-900 text-white pb-24">
-      <ToastContainer position="bottom-right" />
+    <div className="min-h-screen bg-[#F0F7FF]">
+      <ToastContainer />
 
-      <header className="p-4 bg-blue-900 sticky top-0 z-40 flex items-center justify-between">
-        <button onClick={() => router.back()} className="text-white">
-          <FaArrowRight className="rotate-180" size={24} />
-        </button>
-        <h1 className="text-xl font-bold">My Groups</h1>
-        <div className="w-8"></div>
+      {/* --- Professional Deep Blue Header --- */}
+      <header className="bg-[#053B90] text-white shadow-lg sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 h-18 flex items-center justify-between py-4">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => router.back()} 
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <FaArrowLeft className="text-white" />
+            </button>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">My Investments</h1>
+              <div className="flex items-center gap-2 text-[10px] text-blue-200 uppercase font-bold tracking-widest">
+                <span>Dashboard</span>
+                <IoIosArrowForward size={10}/>
+                <span>Chit Groups</span>
+              </div>
+            </div>
+          </div>
+          <button 
+             onClick={() => router.push('/enroll')}
+             className="bg-sky-400 hover:bg-sky-500 text-[#053B90] px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95"
+          >
+            + New Enrollment
+          </button>
+        </div>
       </header>
 
-      <main className="p-4 bg-gray-100 min-h-screen">
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-gradient-to-r from-blue-900 to-blue-700 rounded-xl p-4 text-center">
-            <FaWallet className="text-white mx-auto mb-2" />
-            <p className="text-white font-bold text-lg">
-              {totalPaid !== null
-                ? `₹ ${formatNumberIndianStyle(totalPaid)}`
-                : "Loading..."}
-            </p>
-            <p className="text-white text-xs">Total Investment</p>
-          </div>
-          <div className="bg-gradient-to-r from-green-600 to-green-500 rounded-xl p-4 text-center">
-            <FaChartLine className="text-white mx-auto mb-2" />
-            <p className="text-white font-bold text-lg">
-              {totalProfit !== null
-                ? `₹ ${formatNumberIndianStyle(totalProfit)}`
-                : "Loading..."}
-            </p>
-            <p className="text-white text-xs">Total Profit</p>
-          </div>
-        </div>
+      <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        
+        {/* --- Bluish Stats Row --- */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard 
+            icon={<FaWallet />} 
+            label="Total Investment" 
+            value={formatCurrency(totalPaid)} 
+            variant="primary"
+          />
+          <StatCard 
+            icon={<FaChartLine />} 
+            label="Total Dividend / Profit" 
+            value={formatCurrency(totalProfit)} 
+            variant="soft"
+          />
+          <StatCard 
+            icon={<FaPeopleGroup />} 
+            label="Active Enrollments" 
+            value={cardsData.filter(c => !c.deleted && !c.isPendingApproval).length.toString()} 
+            variant="navy"
+          />
+          
+        </section>
 
-        <div className="bg-gradient-to-r from-purple-700 to-purple-600 rounded-xl p-4 mb-6 flex justify-between items-center">
-          <div>
-            <p className="text-white text-3xl font-bold">
-              {activeCards.length}
-            </p>
-            <p className="text-purple-200 text-sm">Active Groups</p>
-          </div>
-          <FaPeopleGroup className="text-white text-3xl" />
-        </div>
-
-        {cardsToRender.length > 0 && (
-          <div className="bg-white rounded-xl p-4 mb-6 shadow">
-            <h2 className="font-bold text-blue-900 mb-4">All Enrollments</h2>
-            {cardsToRender.map((card, index) => (
-              <div
-                key={index}
-                className="border-b border-gray-200 last:border-0">
-                <button
-                  className="w-full flex justify-between items-center py-3"
-                  onClick={() => toggleAccordion(index)}>
-                  <div className="flex items-center">
-                    <span className="text-gray-500 mr-3">{index + 1}.</span>
-                    <span className="font-medium text-gray-800">
-                      {card.group_id.group_name}
-                    </span>
-                    {card.isPendingApproval && (
-                      <FaHourglassHalf className="text-yellow-500 ml-2" />
-                    )}
-                  </div>
-                  {expandedIndex === index ? (
-                    <FaChevronUp />
-                  ) : (
-                    <FaChevronDown />
-                  )}
-                </button>
-                {expandedIndex === index && (
-                  <div className="pb-4 pl-8">
-                    <div className="grid grid-cols-2 gap-2 mb-2">
-                      <div>
-                        <p className="text-xs text-gray-500">Start Date</p>
-                        <p className="font-medium">
-                          {card.group_id.start_date
-                            ? new Date(
-                                card.group_id.start_date
-                              ).toLocaleDateString()
-                            : "N/A"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">End Date</p>
-                        <p className="font-medium">
-                          {card.group_id.end_date
-                            ? new Date(
-                                card.group_id.end_date
-                              ).toLocaleDateString()
-                            : "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-sm">
-                      <span className="text-gray-500">Ticket: </span>
-                      {card.tickets}
-                    </p>
-                    {card.isPendingApproval && (
-                      <p className="text-yellow-600 text-sm mt-1">
-                        Approval Pending
-                      </p>
-                    )}
-                    <button
-                      className={`mt-2 px-3 py-1 rounded-full text-white text-sm ${
-                        card.isPendingApproval
-                          ? "bg-gray-400"
-                          : "bg-blue-600 hover:bg-blue-700"
-                      }`}
-                      onClick={() => handleScrollToCard(index)}
-                      disabled={card.isPendingApproval}>
-                      {card.isPendingApproval
-                        ? "Approval Pending"
-                        : "View Detailed Card"}
-                    </button>
-                  </div>
-                )}
+        <div className="grid lg:grid-cols-3 gap-8">
+          
+          {/* --- Sidebar Search --- */}
+          <section className="lg:col-span-1">
+            <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm sticky top-24">
+              <h2 className="text-blue-900 font-bold mb-4 flex items-center gap-2">
+                <FaSearch size={14}/> Quick Find
+              </h2>
+              <div className="relative mb-6">
+                <input 
+                  type="text" 
+                  placeholder="Filter by group name..." 
+                  className="w-full pl-4 pr-4 py-3 bg-blue-50/50 border border-blue-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all placeholder:text-blue-300 text-blue-900 font-medium"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-            ))}
-          </div>
-        )}
-
-        {cardsToRender.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">No groups found</div>
-            <button
-              className="bg-green-600 text-white px-6 py-2 rounded-full font-medium"
-              onClick={() => router.push("/enrollment")}>
-              Enroll Now
-            </button>
-          </div>
-        ) : (
-          <div ref={scrollViewRef} className="space-y-4">
-            {cardsToRender.map((card, index) => {
-              const ticketKey = card.tickets;
-              const groupIdFromCard = card.group_id._id;
-              const groupReportKey = `${groupIdFromCard}-${ticketKey}`;
-
-              const isDeleted = card.deleted;
-              const isCompleted = card.completed;
-              const isPending = card.isPendingApproval;
-
-              const individualPaidAmount = isPending
-                ? 0
-                : individualGroupReports[groupReportKey]?.totalPaid || 0;
-              const paidPercentage = calculatePaidPercentage(
-                card.group_id.group_value,
-                individualPaidAmount
-              );
-
-              let bgColor = "bg-white";
-              let borderClass = "border";
-              if (isDeleted) {
-                bgColor = "bg-gray-100";
-                borderClass = "border-gray-300";
-              } else if (isPending) {
-                bgColor = "bg-yellow-50";
-                borderClass = "border-yellow-300";
-              } else if (isCompleted) {
-                bgColor = "bg-green-50";
-                borderClass = "border-green-300";
-              } else {
-                bgColor = "bg-blue-50";
-                borderClass = "border-blue-300";
-              }
-
-              return (
-                <div
-                  key={index}
-                  ref={(el) => (cardRefs.current[`card-${index}`] = el)} 
-                  className={`${bgColor} rounded-xl p-4 shadow ${borderClass} ${
-                    highlightedCardIndex === index ? "ring-2 ring-blue-500" : ""
-                  }`}>
-                  <div className="flex items-start mb-4">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center mr-3">
-                      {isDeleted ? (
-                        <FaTrashAlt className="text-red-500" />
-                      ) : isPending ? (
-                        <FaHourglassHalf className="text-yellow-500" />
-                      ) : isCompleted ? (
-                        <FaCheckCircle className="text-green-500" />
-                      ) : (
-                        <span className="text-blue-600 font-bold">₹</span>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h3
-                        className={`font-bold ${
-                          isDeleted
-                            ? "text-red-500"
-                            : isPending
-                            ? "text-yellow-600"
-                            : isCompleted
-                            ? "text-green-600"
-                            : "text-gray-800"
-                        }`}>
+              
+              <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {filteredCards.map((card, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleScrollToCard(idx)}
+                    className="w-full text-left p-3.5 rounded-xl hover:bg-blue-600 group transition-all border border-transparent hover:shadow-md"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-bold text-blue-900 group-hover:text-white truncate">
                         {card.group_id.group_name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Ticket: {ticketKey}
-                      </p>
-                      {isDeleted && (
-                        <p className="text-xs text-red-500 mt-1">
-                          Removed: {card.removal_reason || "Unknown"}
-                        </p>
-                      )}
-                      {isCompleted && (
-                        <p className="text-xs text-green-600 mt-1">Completed</p>
-                      )}
-                      {isPending && (
-                        <p className="text-xs text-yellow-600 mt-1">
-                          Approval Pending
-                        </p>
-                      )}
+                      </span>
                     </div>
-                  </div>
+                    <p className="text-[11px] text-blue-500 group-hover:text-blue-100 font-semibold">TICKET ID: {card.tickets}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
 
-                  {/* Dates */}
-                  <div className="grid grid-cols-2 gap-2 mb-4 bg-gray-100 p-2 rounded-lg">
-                    <div>
-                      <p className="text-xs text-gray-500">Start Date</p>
-                      <p className="font-medium">
-                        {card.group_id.start_date
-                          ? new Date(
-                              card.group_id.start_date
-                            ).toLocaleDateString()
-                          : "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">End Date</p>
-                      <p className="font-medium">
-                        {card.group_id.end_date
-                          ? new Date(
-                              card.group_id.end_date
-                            ).toLocaleDateString()
-                          : "N/A"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Progress */}
-                  <div className="mb-3">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Paid</span>
-                      <span className="font-bold">{paidPercentage}%</span>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${
-                          isPending ? "bg-gray-400" : "bg-blue-600"
-                        }`}
-                        style={{ width: `${paidPercentage}%` }}></div>
-                    </div>
-                  </div>
-
-                  {/* Amounts */}
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div>
-                      <p className="text-xs text-gray-500">Total Value</p>
-                      <p className="font-bold">
-                        ₹ {formatNumberIndianStyle(card.group_id.group_value)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Paid</p>
-                      <p
-                        className={`font-bold ${
-                          isPending ? "text-gray-400" : "text-blue-600"
-                        }`}>
-                        ₹ {formatNumberIndianStyle(individualPaidAmount)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* View Payments Button */}
-                  {!isPending && (
-                    <button
-                      className="w-full bg-blue-600 text-white py-2 rounded-lg flex items-center justify-center"
-                      onClick={() =>
-                        handleCardPress(card.group_id._id, ticketKey)
-                      }>
-                      <span>View Payments & Details</span>
-                      <IoIosArrowForward className="ml-2" />
-                    </button>
-                  )}
+          {/* --- Main Content Cards --- */}
+          <section className="lg:col-span-2 space-y-6">
+            {filteredCards.length === 0 ? (
+              <div className="bg-white border-2 border-dashed border-blue-200 rounded-3xl p-16 text-center">
+                <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FaInfoCircle className="text-blue-400" size={32} />
                 </div>
-              );
-            })}
-          </div>
-        )}
+                <p className="text-blue-900 font-bold mb-2">No active groups match your criteria</p>
+                <button onClick={() => setSearchQuery("")} className="text-blue-600 text-sm font-bold hover:underline">Reset Search Filters</button>
+              </div>
+            ) : (
+              filteredCards.map((card, index) => {
+                const report = individualGroupReports[`${card.group_id._id}-${card.tickets}`];
+                const paidAmt = report?.totalPaid || 0;
+                const progress = Math.min(100, Math.round((paidAmt / card.group_id.group_value) * 100));
+
+                return (
+                  <div
+                    key={index}
+                    ref={(el) => (cardRefs.current[`card-${index}`] = el)}
+                    className="bg-white border border-blue-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+                  >
+                    <div className="p-6">
+                      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-8">
+                        <div className="flex items-center gap-5">
+                          <StatusIcon card={card} />
+                          <div>
+                            <h3 className="text-xl font-extrabold text-[#053B90] tracking-tight">
+                              {card.group_id.group_name}
+                            </h3>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <span className="text-[10px] font-black text-blue-600 bg-blue-50 border border-blue-100 px-2 py-1 rounded">#{card.tickets}</span>
+                              <StatusBadge card={card} />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {!card.isPendingApproval && (
+                          <button
+                            onClick={() => router.push(`/enroll/group?groupId=${card.group_id._id}&ticket=${card.tickets}`)}
+                            className="w-full md:w-auto px-6 py-2.5 bg-blue-50 text-blue-700 text-xs font-black rounded-full hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                          >
+                            MANAGE ACCOUNT <IoIosArrowForward />
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 bg-blue-50/30 p-4 rounded-2xl border border-blue-50">
+                        <InfoItem label="Group Valuation" value={formatCurrency(card.group_id.group_value)} />
+                        <InfoItem label="Amount Invested" value={formatCurrency(paidAmt)} highlight />
+                        <InfoItem label="Start Cycle" value={new Date(card.group_id.start_date).toLocaleDateString()} />
+                        <InfoItem label="Maturity Date" value={new Date(card.group_id.end_date).toLocaleDateString()} />
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-end">
+                          <span className="text-xs font-bold text-blue-900 uppercase tracking-tighter">Maturity Progress</span>
+                          <span className="text-lg font-black text-blue-600">{progress}%</span>
+                        </div>
+                        <div className="h-3 w-full bg-blue-100/50 rounded-full overflow-hidden p-0.5">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-1000 ease-out shadow-sm ${card.isPendingApproval ? 'bg-blue-200' : 'bg-gradient-to-r from-blue-400 to-blue-700'}`}
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </section>
+        </div>
       </main>
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #dbeafe; border-radius: 10px; }
+      `}</style>
     </div>
   );
+};
+
+// --- Sub-Components (Bluish Variants) ---
+
+const StatCard = ({ icon, label, value, variant }: { icon: React.ReactNode, label: string, value: string, variant: 'primary' | 'sky' | 'navy' | 'soft' }) => {
+  const themes = {
+    primary: "bg-[#053B90] text-white",
+    sky: "bg-sky-500 text-white",
+    navy: "bg-blue-800 text-white",
+    soft: "bg-white text-blue-900 border border-blue-100"
+  };
+
+  return (
+    <div className={`${themes[variant]} p-6 rounded-2xl shadow-sm hover:translate-y-[-2px] transition-transform`}>
+      <div className={`text-2xl mb-3 ${variant === 'soft' ? 'text-blue-600' : 'text-blue-100/50'}`}>
+        {icon}
+      </div>
+      <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${variant === 'soft' ? 'text-blue-400' : 'text-blue-200'}`}>{label}</p>
+      <p className="text-xl font-black">{value}</p>
+    </div>
+  );
+};
+
+const InfoItem = ({ label, value, highlight = false }: { label: string, value: string, highlight?: boolean }) => (
+  <div className="flex flex-col">
+    <span className="text-[9px] font-black text-blue-400 uppercase mb-1">{label}</span>
+    <span className={`text-sm font-bold truncate ${highlight ? 'text-blue-700' : 'text-blue-900'}`}>{value}</span>
+  </div>
+);
+
+const StatusBadge = ({ card }: { card: Card }) => {
+  const base = "text-[9px] px-2 py-0.5 rounded-full font-black uppercase border";
+  if (card.deleted) return <span className={`${base} bg-red-50 text-red-600 border-red-100`}>Terminated</span>;
+  if (card.isPendingApproval) return <span className={`${base} bg-blue-50 text-blue-400 border-blue-100`}>Verifying</span>;
+  if (card.completed) return <span className={`${base} bg-blue-900 text-white border-blue-900`}>Matured</span>;
+  return <span className={`${base} bg-sky-100 text-sky-700 border-sky-200`}>Active</span>;
+};
+
+const StatusIcon = ({ card }: { card: Card }) => {
+  const base = "w-14 h-14 rounded-2xl flex items-center justify-center text-xl shadow-sm border border-blue-50";
+  if (card.deleted) return <div className={`${base} bg-red-50 text-red-500`}><FaTrashAlt /></div>;
+  if (card.isPendingApproval) return <div className={`${base} bg-blue-50 text-blue-400`}><FaHourglassHalf /></div>;
+  if (card.completed) return <div className={`${base} bg-blue-900 text-white`}><FaCheckCircle /></div>;
+  return <div className={`${base} bg-white text-blue-600 font-black`}>₹</div>;
 };
 
 export default MyGroups;
