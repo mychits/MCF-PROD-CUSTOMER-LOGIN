@@ -2,9 +2,18 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { 
+  IoChevronBack, 
+  IoShieldCheckmarkOutline, 
+  IoRocketOutline, 
+  IoDiamondOutline 
+} from "react-icons/io5";
 
+interface OtpVerificationProps {
+  mobileNumber?: string;
+}
 
-const OtpVerification = ({ mobileNumber = "1234567890" }) => {
+const OtpVerification = ({ mobileNumber = "1234567890" }: OtpVerificationProps) => {
   const router = useRouter();
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [seconds, setSeconds] = useState(59);
@@ -25,12 +34,13 @@ const OtpVerification = ({ mobileNumber = "1234567890" }) => {
   }, [timerActive, seconds]);
 
   const handleChange = (value: string, index: number) => {
-    if (isNaN(Number(value))) return; // Only allow numbers
+    if (isNaN(Number(value))) return;
 
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
 
+    // Auto-focus next input
     if (value && index < 3) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -45,12 +55,10 @@ const OtpVerification = ({ mobileNumber = "1234567890" }) => {
   };
 
   const handleVerify = () => {
-    if (otp.every((digit) => digit !== "")) {
-      const fullOtp = otp.join("");
+    const fullOtp = otp.join("");
+    if (fullOtp.length === 4) {
       console.log("Verifying OTP:", fullOtp);
-      alert(`OTP ${fullOtp} submitted for ${mobileNumber}`);
-    } else {
-      alert("Please enter the complete 4-digit OTP.");
+      // Add your API logic here
     }
   };
 
@@ -64,83 +72,139 @@ const OtpVerification = ({ mobileNumber = "1234567890" }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#053B90] flex flex-col items-center justify-center font-sans">
-      <div className="w-full max-w-md flex flex-col h-screen md:h-auto md:min-h-[600px]">
+    <div className="min-h-screen bg-[#053B90] flex items-center justify-center p-4 sm:p-8 relative overflow-x-hidden">
+      
+      {/* Dynamic Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-400/20 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-cyan-400/20 rounded-full blur-[120px] animate-pulse"></div>
+      </div>
+
+      <div className="w-full max-w-6xl z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         
-        <div className="flex-[0.6] flex flex-col items-center justify-center p-6 text-white animate-fade-in">
-          <div className="w-24 h-24 mb-4 bg-white/10 rounded-3xl p-4 backdrop-blur-md">
-             <img 
-               src="/images/MyChitsLogo.png" 
-               alt="MyChits Logo" 
-               className="w-full h-full object-contain"
-             />
+        {/* LEFT SIDE: Brand Identity (Hidden on small mobile, shown on Desktop) */}
+        <div className="text-white space-y-8 animate-fadeIn order-2 lg:order-1">
+          <div className="space-y-4">
+            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+              Secure Your <span className="text-cyan-400">Account</span>
+            </h2>
+            <p className="text-blue-100 text-lg opacity-90 max-w-md">
+              We've sent a 4-digit verification code to <span className="font-bold text-white"> +91 {mobileNumber}</span>
+            </p>
           </div>
-          <h1 className="text-3xl font-bold tracking-wider">MyChits</h1>
+
+          <div className="grid gap-6">
+            <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10">
+              <div className="bg-cyan-500/20 p-3 rounded-xl">
+                <IoShieldCheckmarkOutline className="text-2xl text-cyan-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-xl">Two-Factor Security</h3>
+                <p className="text-blue-100/70 text-sm">Ensuring your investments and savings are protected with bank-grade security.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10">
+              <div className="bg-cyan-500/20 p-3 rounded-xl">
+                <IoRocketOutline className="text-2xl text-cyan-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-xl">Instant Access</h3>
+                <p className="text-blue-100/70 text-sm">Verify once and get seamless access to your dashboard and chit auctions.</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex-1 bg-[#C7E3EF] rounded-t-[40px] md:rounded-[40px] px-8 pt-12 pb-8 flex flex-col items-center shadow-2xl">
-          <h2 className="text-xl font-extrabold text-black mb-8 uppercase tracking-tight">
-            Enter OTP
-          </h2>
-
-          <div className="flex justify-between w-full max-w-[280px] mb-10">
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(e.target.value, index)}
-                onKeyDown={(e) => handleKeyDown(e, index)}
-                className="w-14 h-16 bg-white border-2 border-blue-400 rounded-2xl text-center text-2xl font-bold text-[#053B90] outline-none focus:ring-4 focus:ring-blue-500/20 transition-all"
-              />
-            ))}
-          </div>
-
-          {/* Timer */}
-          <div className="text-[#053B90] font-semibold text-lg mb-12">
-            00:{seconds < 10 ? `0${seconds}` : seconds}
-          </div>
-
-          <button
-            onClick={handleVerify}
-            className="w-full bg-white hover:bg-slate-50 text-[#1A237E] font-black py-4 rounded-full shadow-lg transition-transform active:scale-95 mb-6 uppercase tracking-widest"
-          >
-            Verify
-          </button>
-
-          <button
-            onClick={handleResend}
-            disabled={timerActive}
-            className={`text-sm transition-colors ${
-              timerActive ? "text-slate-400 cursor-not-allowed" : "text-[#053B90] hover:underline"
-            }`}
-          >
-            Didn't get it? <span className="font-bold">Send Again</span>
-          </button>
-
-          <div className="mt-auto pt-8">
-            <p className="text-[#455A64] text-sm">
-              Don't have an account?{" "}
+        {/* RIGHT SIDE: OTP Card */}
+        <div className="flex justify-center lg:justify-end order-1 lg:order-2">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/20 transform transition-all">
+            
+            {/* Form Header */}
+            <div className="bg-gradient-to-br from-[#053B90] to-[#0747A6] py-10 px-6 text-center relative">
               <button 
-                onClick={() => router.push('/register')}
-                className="text-black font-black hover:underline"
+                onClick={() => router.back()}
+                className="absolute top-6 left-6 text-white/70 hover:text-white transition-colors"
               >
-                Sign Up
+                <IoChevronBack size={24} />
               </button>
-            </p>
+              <div className="relative z-10">
+                <div className="bg-white p-3 rounded-2xl inline-block mb-4 shadow-lg">
+                  <img src="/images/MyChitsLogo.png" alt="Logo" className="w-12 h-12 object-contain" />
+                </div>
+                <h1 className="text-white text-2xl font-bold">Verification OTP</h1>
+                <p className="text-blue-100 text-xs opacity-80 mt-1 font-medium tracking-widest uppercase">Step 2 of 2</p>
+              </div>
+            </div>
+
+            <div className="p-8 sm:p-10 flex flex-col items-center">
+              <h2 className="text-slate-800 font-bold text-lg mb-2">Enter the 4-digit code</h2>
+              <p className="text-slate-400 text-sm text-center mb-8">Verification code was sent to your phone</p>
+
+              {/* OTP Input Group */}
+              <div className="flex justify-between w-full max-w-[280px] mb-8">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (inputRefs.current[index] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={10} // Safety for some mobile browsers
+                    value={digit}
+                    onChange={(e) => handleChange(e.target.value, index)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    className="w-14 h-16 bg-slate-50 border-2 border-slate-100 rounded-2xl text-center text-2xl font-black text-[#053B90] outline-none focus:border-[#053B90] focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all shadow-sm"
+                  />
+                ))}
+              </div>
+
+              {/* Timer Display */}
+              <div className="flex items-center gap-2 mb-10">
+                <div className={`px-4 py-2 rounded-full font-bold text-sm ${timerActive ? 'bg-blue-50 text-[#053B90]' : 'bg-rose-50 text-rose-500'}`}>
+                   00:{seconds < 10 ? `0${seconds}` : seconds}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <button
+                onClick={handleVerify}
+                className="w-full h-14 bg-[#053B90] text-white font-bold rounded-xl uppercase tracking-widest shadow-lg shadow-blue-900/20 hover:bg-[#0747A6] transition-all active:scale-95 mb-6"
+              >
+                Verify & Proceed
+              </button>
+
+              <button
+                onClick={handleResend}
+                disabled={timerActive}
+                className={`text-sm font-bold flex items-center gap-2 transition-colors ${
+                  timerActive ? "text-slate-300 cursor-not-allowed" : "text-[#053B90] hover:underline"
+                }`}
+              >
+                Didn't get the code? <span className={!timerActive ? "text-[#0747A6]" : ""}>Send Again</span>
+              </button>
+
+              <div className="mt-10 pt-6 border-t border-slate-100 w-full text-center">
+                <p className="text-slate-500 text-sm">
+                  Wrong number?{" "}
+                  <button 
+                    onClick={() => router.push('/register')}
+                    className="text-[#053B90] font-bold hover:underline"
+                  >
+                    Change here
+                  </button>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <style jsx>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateX(-20px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-        .animate-fade-in {
+        .animate-fadeIn {
           animation: fadeIn 0.8s ease-out forwards;
         }
       `}</style>

@@ -28,8 +28,8 @@ const AboutUs = () => {
           
           <div className="hidden md:flex items-center gap-8 text-sm font-bold text-gray-600">
             <Link href="/" className="hover:text-[#053B90] transition-colors">Home</Link>
-            <Link href="/about" className="text-[#053B90]">About Us</Link>
-            <Link href="/faq" className="hover:text-[#053B90] transition-colors">F&Q</Link>
+            <Link href="https://mychits.co.in/about-us" target="_blank" className="text-[#053B90]">About Us</Link>
+            <Link href="https://mychits.co.in/faqs" target="_blank" className="hover:text-[#053B90] transition-colors">F&Q</Link>
           </div>
 
           <div className="flex items-center gap-3">
@@ -196,9 +196,9 @@ const AboutUs = () => {
               <span className="text-xl font-black text-[#053B90]">MY CHITS</span>
             </div>
             <div className="flex gap-8 text-sm font-bold text-gray-500">
-              <Link href="/privacy" className="hover:text-[#053B90]">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-[#053B90]">Terms of Service</Link>
-              <Link href="/contact" className="hover:text-[#053B90]">Contact Us</Link>
+              <Link href="https://mychits.co.in/privacypolicy.php" target="_blank" className="hover:text-[#053B90]">Privacy Policy</Link>
+              <Link href="https://mychits.co.in/refundpolicy.php" target="_blank" className="hover:text-[#053B90]">Terms and Conditions</Link>
+              <Link href="https://mychits.co.in/contact-us" className="hover:text-[#053B90]" target="_blank">Contact Us</Link>
             </div>
           </div>
           <div className="text-center text-sm text-gray-400">
