@@ -148,8 +148,10 @@ const GroupCard = ({ card, onSelect }: any) => {
     </div>
   );
 };
-
-const Auctions = ({ params }: { params: Promise<{ userId: string }> }) => {
+interface Params{
+  params:Promise<{userId:string}>
+}
+const Auctions = ({ params }: Params) => {
   const userParams = use(params);
   const userId = userParams?.userId;
 

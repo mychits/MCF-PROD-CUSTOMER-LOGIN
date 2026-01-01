@@ -20,8 +20,10 @@ const insuranceOptions = [
   { title: "Term", image: "/images/Termlife.png", color: "#053B90" },
   { title: "Health", image: "/images/health.png", color: "#004775" },
 ];
-
-const Insurance = ({ params }: { params: Promise<{ userId: string }> }) => {
+interface Params{
+  params:Promise<{userId:string}>
+}
+const Insurance = ({ params }: Params) => {
   const router = useRouter();
   const { userId } = use(params);
   const [loading, setLoading] = useState(false);

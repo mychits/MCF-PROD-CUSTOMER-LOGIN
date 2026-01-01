@@ -73,8 +73,10 @@ interface ServiceItem {
   filter?: string;
   featureTitle?: string;
 }
-
-const Home = ({ params }: { params: Promise<{ userId: string }> }) => {
+interface Params{
+  params:Promise<{userId:string}>
+}
+const Home = ({ params }: Params) => {
   const router = useRouter();
   const userIdData = use(params);
   const userId = userIdData.userId;

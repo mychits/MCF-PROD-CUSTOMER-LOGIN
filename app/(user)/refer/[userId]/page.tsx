@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, use } from "react";
 import { useRouter } from "next/navigation";
 import { IoChevronBack, IoPersonAddOutline, IoCallOutline, IoMailOutline, IoLocationOutline } from "react-icons/io5";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import url from "@/app/utils/urls/BaseUrl";
-
-const IntroduceNewCustomers = ({ params }: { params: { userId: string } }) => {
+interface Params{
+  params:Promise<{userId:string}>
+}
+const IntroduceNewCustomers = ({ params }: Params) => {
+  const paramsObject = use(params);
+  const userId = paramsObject.userId;
   const router = useRouter();
   const [formData, setFormData] = useState({ fullName: "", email: "", phoneNumber: "", zipCode: "" });
   const [isLoading, setIsLoading] = useState(false);

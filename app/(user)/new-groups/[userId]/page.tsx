@@ -22,7 +22,7 @@ import axios from "axios";
 
 import url from "@/app/utils/urls/BaseUrl";
 
-// --- Logic: Indian Style Number Formatting ---
+
 const formatNumberIndianStyle = (num: number | string) => {
   if (num === null || num === undefined) return "0";
   const parts = num.toString().split('.');
@@ -49,8 +49,10 @@ const getVacantSeats = (card: any) => {
   const enrolledMembers = parseInt(card.enrolled_members, 10) || 0; 
   return Math.max(0, totalMembers - enrolledMembers);
 };
-
-const Enrollment = ({ params }: { params: Promise<{ userId: string }> }) => {
+interface Params{
+  params:Promise<{userId:string}>
+}
+const Enrollment = ({ params }: Params) => {
   const userParams = use(params);
   const userId = userParams?.userId;
   const router = useRouter();

@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { IoChevronBack, IoTrendingUpOutline, IoReceiptOutline, IoCallOutline, IoMailOutline } from "react-icons/io5";
 import axios from "axios";
 import url from "@/app/utils/urls/BaseUrl";
-
-const ReportList = ({ params }: { params: Promise<{ userId: string }> }) => {
+interface Params{
+  params:Promise<{userId:string}>
+}
+const ReportList = ({ params }:Params) => {
   const router = useRouter();
   const { userId } = use(params);
   const [accounts, setAccounts] = useState([]);

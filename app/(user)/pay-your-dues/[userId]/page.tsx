@@ -36,8 +36,11 @@ const formatNumberIndianStyle = (num: number | string) => {
   }
   return (isNegative ? "-" : "") + integerPart + decimalPart;
 };
-
-const PayYourDues = ({params}:{params:Promise<{userId:string}>}) => {
+interface Params
+{
+  params:Promise<{userId:string}>
+}
+const PayYourDues = ({params}:Params) => {
   const userParams = use(params);
   const router = useRouter();
   const userId = userParams?.userId;

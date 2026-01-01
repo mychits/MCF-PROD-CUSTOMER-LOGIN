@@ -17,8 +17,10 @@ import {
 } from "react-icons/md";
 
 import url from "@/app/utils/urls/BaseUrl";
-
-const Profile = ({ params }: { params: Promise<{ userId: string }> }) => {
+interface Params{
+  params:Promise<{userId:string}>
+}
+const Profile = ({ params }: Params) => {
   const paramUser = use(params);
   const router = useRouter();
   const userId = paramUser.userId;

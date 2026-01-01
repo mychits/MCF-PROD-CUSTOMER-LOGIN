@@ -52,16 +52,17 @@ interface PaymentsSummary {
   totalPaidAmount: number;
 }
 
-// --- Constants ---
 const PURPOSE_OPTIONS = ["Personal", "Medical", "Education", "Business", "Others"];
 const CONTACT_EMAIL = "info.mychits@gmail.com";
 const CONTACT_PHONE = "+919483900777";
-
-const MyLoan = ({params}:{params:Promise<{userId:string}>}) => {
+interface Params{
+  params:Promise<{userId:string}>
+}
+const MyLoan = ({params}:Params) => {
   const router = useRouter();
 
-  // User ID - replace with real auth logic
-  const userId = use(params);
+  const paramsObject = use(params);
+  const userId = paramsObject.userId;
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +80,6 @@ const MyLoan = ({params}:{params:Promise<{userId:string}>}) => {
   const [loanId, setLoanId] = useState<string | null>(null);
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
 
-  // --- Form State ---
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -90,7 +90,6 @@ const MyLoan = ({params}:{params:Promise<{userId:string}>}) => {
     otherPurpose: "",
   });
 
-  // --- Fetch User Data for Form ---
   useEffect(() => {
     const fetchFreshProfile = async () => {
       if (!userId || !url) return;
@@ -114,7 +113,6 @@ const MyLoan = ({params}:{params:Promise<{userId:string}>}) => {
     fetchFreshProfile();
   }, [userId]);
 
-  // --- Fetch Loans ---
   useEffect(() => {
     if (!userId) return;
     const fetchLoans = async () => {
@@ -133,7 +131,6 @@ const MyLoan = ({params}:{params:Promise<{userId:string}>}) => {
     fetchLoans();
   }, [userId]);
 
-  // --- Fetch Loan Details & Payments ---
   useEffect(() => {
     if (!userId || !loanId) return;
     const fetchData = async () => {
@@ -160,7 +157,6 @@ const MyLoan = ({params}:{params:Promise<{userId:string}>}) => {
     fetchData();
   }, [userId, loanId, currentPage]);
 
-  // --- Fetch Pagination ---
   useEffect(() => {
     if (!userId || !loanId) return;
     const fetchTotalPages = async () => {
@@ -175,7 +171,6 @@ const MyLoan = ({params}:{params:Promise<{userId:string}>}) => {
     fetchTotalPages();
   }, [userId, loanId]);
 
-  // --- Format Number (Indian Style) ---
   const formatNumberIndianStyle = (num: number | string | null | undefined): string => {
     if (num === null || num === undefined) return "0";
     const safeNum = isNaN(parseFloat(num as string)) ? 0 : parseFloat(num as string);
@@ -185,7 +180,6 @@ const MyLoan = ({params}:{params:Promise<{userId:string}>}) => {
     }).format(safeNum);
   };
 
-  // --- Pagination Logic ---
   const getPaginationNumbers = () => {
     const pages: (number | string)[] = [];
     const limit = 3;
