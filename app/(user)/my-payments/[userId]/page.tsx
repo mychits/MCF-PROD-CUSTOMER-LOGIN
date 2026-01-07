@@ -219,7 +219,6 @@ const Payments = ({ params }: Params) => {
 
         {activeCards.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-slate-300">
-            <div className="text-slate-300 text-6xl mb-4">📋</div>
             <h4 className="text-slate-800 font-bold text-lg">No Active Groups</h4>
             <p className="text-slate-500">Your joined groups will appear here once approved.</p>
           </div>

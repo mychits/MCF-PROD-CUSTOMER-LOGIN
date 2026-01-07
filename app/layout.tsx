@@ -18,6 +18,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MyChits Customer",
   description: "MyChits Customer App",
+  icons:{
+    icon:"/images/MyChitsLogo.png",
+   
+  }
 };
 
 export default function RootLayout({

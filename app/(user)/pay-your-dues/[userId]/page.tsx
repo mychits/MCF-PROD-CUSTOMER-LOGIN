@@ -174,7 +174,7 @@ const PayYourDues = ({params}:Params) => {
           <div className="flex justify-center py-20"><div className="w-12 h-12 border-4 border-blue-900 border-t-transparent rounded-full animate-spin" /></div>
         ) : cardsData.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
-            <img src="/images/Nogroup.png" className="w-40 mx-auto opacity-20 mb-4" alt="Empty" />
+           
             <p className="text-slate-400 font-bold uppercase tracking-widest">No outstanding groups found</p>
           </div>
         ) : (

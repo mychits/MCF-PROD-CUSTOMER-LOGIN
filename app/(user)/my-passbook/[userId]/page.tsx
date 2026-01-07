@@ -159,11 +159,7 @@ export default function MyPassbook({ params }: Params) {
             <div className="py-20 text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
               <div className="relative inline-block">
                 <div className="absolute inset-0 bg-blue-100 rounded-full blur-3xl scale-150 opacity-50"></div>
-                <img 
-                  src="/assets/Nogroup.png" 
-                  alt="No groups" 
-                  className="relative w-56 md:w-80 mx-auto grayscale-[0.2] hover:grayscale-0 transition-all duration-500"
-                />
+               
               </div>
               <div className="max-w-md mx-auto">
                 <h3 className="text-3xl font-black text-gray-800 mb-3">No Groups Enrolled Yet!</h3>
