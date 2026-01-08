@@ -123,7 +123,7 @@ export default function MyPassbook({ params }: Params) {
                 className={`relative overflow-hidden group bg-gradient-to-br ${card.color} p-8 rounded-[2rem] flex flex-col justify-between h-48 transform hover:-translate-y-2 transition-all duration-300 shadow-2xl ${card.shadow}`}
               >
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform duration-500 text-white">
-                  {React.cloneElement(card.icon as React.ReactElement, { size: 100 })}
+                  {React.cloneElement(card.icon as React.ReactElement, )}
                 </div>
                 <div className="bg-white/20 w-12 h-12 rounded-xl flex items-center justify-center text-white mb-4 backdrop-blur-sm">
                   {card.icon}

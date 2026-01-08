@@ -297,7 +297,7 @@ const MyGroups = ({ params }: Params) => {
                 return (
                   <div
                     key={index}
-                    ref={(el) => (cardRefs.current[`card-${index}`] = el)}
+                    ref={(el) => {cardRefs.current[`card-${index}`] = el}}
                     className="bg-white border border-blue-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
                     <div className="p-6">
                       <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-8">
