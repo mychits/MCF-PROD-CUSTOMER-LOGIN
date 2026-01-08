@@ -29,7 +29,7 @@ const OtpVerification = ({ searchParams }: SearchParams) => {
   const [seconds, setSeconds] = useState(59);
   const [timerActive, setTimerActive] = useState(true);
   const [loading, setLoading] = useState(false);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputRefs = useRef<(HTMLInputElement | null )[]>([]);
 
   // Timer Logic
   useEffect(() => {
@@ -241,7 +241,7 @@ const OtpVerification = ({ searchParams }: SearchParams) => {
                 {otp.map((digit, index) => (
                   <input
                     key={index}
-                    ref={(el) => (inputRefs.current[index] = el)}
+                    ref={(el) => {inputRefs.current[index] = el}}
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
