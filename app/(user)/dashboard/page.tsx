@@ -54,7 +54,7 @@ const Home = ({params}:Params) => {
    
     const [activeChitsCount, setActiveChitsCount] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const horizontalScrollRef = useRef(null);
+    const horizontalScrollRef = useRef<HTMLDivElement | null>(null);
 
     // Fetch Logic (Preserved)
     useEffect(() => {
@@ -70,7 +70,6 @@ const Home = ({params}:Params) => {
         fetchActiveCounts();
     }, []);
 
-    // Auto-scroll Logic for Schemes
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % SCROLL_IMAGES.length);
@@ -80,13 +79,11 @@ const Home = ({params}:Params) => {
             }
         }, 4000);
         return () => clearInterval(interval);
-    }, [currentIndex]);
+    }, [currentIndex]);   
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] overflow-x-hidden pb-10">
-            {/* --- BRAND HEADER --- */}
             <header className="relative bg-[#042f74] text-white pt-10 pb-24 px-6 rounded-b-[45px] overflow-hidden transition-all duration-700 animate-in fade-in slide-in-from-top-5">
-                {/* Decorative Orbs */}
                 <div className="absolute w-48 h-48 bg-white opacity-5 rounded-full -top-12 -right-12 animate-pulse"></div>
                 <div className="absolute w-36 h-36 bg-white opacity-5 rounded-full -bottom-10 -left-8 animate-pulse"></div>
 
