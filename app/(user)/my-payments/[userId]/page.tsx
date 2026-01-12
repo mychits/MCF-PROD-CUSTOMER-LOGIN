@@ -141,7 +141,7 @@ const Payments = ({ params }: Params) => {
   }, [userId, fetchTickets, fetchAllOverview]);
 
   const handleCardPress = (groupId: string, ticket: number) => {
-    router.push(`/enroll/group?groupId=${groupId}&ticket=${ticket}`);
+    router.push(`/enroll/group?userId=${userId}&groupId=${groupId}&ticket=${ticket}`);
   };
 
   if (loading) {

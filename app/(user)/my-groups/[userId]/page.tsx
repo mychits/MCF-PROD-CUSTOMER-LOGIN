@@ -320,7 +320,7 @@ const MyGroups = ({ params }: Params) => {
                           <button
                             onClick={() =>
                               router.push(
-                                `/enroll/group?groupId=${card.group_id._id}&ticket=${card.tickets}`
+                                `/enroll/group?userId=${userId}&groupId=${card.group_id._id}&ticket=${card.tickets}`
                               )
                             }
                             className="w-full md:w-auto px-6 py-2.5 bg-blue-50 text-blue-700 text-xs font-black rounded-full hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2">

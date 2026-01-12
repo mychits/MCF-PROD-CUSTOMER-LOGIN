@@ -315,7 +315,7 @@ const Home = ({ params }: Params) => {
       <header className="sticky top-0 z-40 bg-[#053B90] text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button
+            <button 
               onClick={() => setIsSideMenuVisible(true)}
               className="p-2 hover:bg-white/10 rounded-lg lg:hidden">
               <FaBars size={22} />
@@ -368,19 +368,51 @@ const Home = ({ params }: Params) => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
-        <section className="bg-gradient-to-br from-[#053B90] to-[#0a56cc] rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
-          <div className="relative z-10">
-            <h2 className="text-blue-200 text-lg font-medium">{greeting}!</h2>
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight mt-1">
-              {userData.full_name || "Valued Member"}
-            </h1>
-            <p className="text-blue-100/80 mt-4 max-w-md">
-              Welcome back to your digital chit dashboard. Manage your savings
-              and auctions with ease.
-            </p>
-          </div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl" />
-        </section>
+       <section className="bg-gradient-to-br from-[#053B90] to-[#0a56cc] rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+  {/* Background Decoration */}
+  <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
+  
+  <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+    {/* Text Content */}
+    <div className="flex-1">
+      <h2 className="text-blue-200 text-sm sm:text-lg font-medium tracking-wide uppercase">
+        {greeting}!
+      </h2>
+      <h1 className="text-3xl sm:text-5xl font-black tracking-tight mt-1">
+        {userData.full_name || "Valued Member"}
+      </h1>
+      <p className="text-blue-100/80 mt-4 max-w-md leading-relaxed">
+        Welcome back to your digital chit dashboard. Manage your savings
+        and auctions with ease.
+      </p>
+    </div>
+
+    {/* Responsive Button */}
+    <button onClick={()=>router.push(`/pay-now/${userId}`)} className="group relative isolate overflow-hidden flex items-center justify-center gap-3 px-8 py-3.5 rounded-full bg-emerald-500 text-white font-semibold tracking-wide transition-all duration-300 hover:bg-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] active:scale-95 sm:self-start border border-emerald-400/30 shadow-xl">
+  
+  {/* Inner Light Effect (Makes it look premium/3D) */}
+  <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+  <div className="absolute top-0 left-0 right-0 h-[1px] bg-white/30" />
+
+  <span className="relative z-10 text-sm sm:text-base">Pay Online</span>
+  
+  <div className="relative z-10 flex items-center justify-center w-6 h-6 rounded-full bg-white/20 group-hover:bg-white/30 transition-colors">
+    <svg 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" 
+      stroke="currentColor" 
+      strokeWidth="3"
+    >
+      <path d="M5 12h14m-7-7l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </div>
+
+  {/* Subtle Background Shimmer */}
+  <div className="absolute inset-0 -translate-x-full" />
+</button>
+  </div>
+</section>
 
         <section>
           <div className="flex items-center gap-4 mb-6">
