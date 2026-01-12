@@ -140,7 +140,7 @@ export default function Login() {
                       type="tel"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                      className="w-full h-14 pl-14 pr-4 rounded-xl border-2 border-gray-100 focus:border-[#053B90] focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                      className="w-full h-14 pl-14 pr-4 rounded-xl border-2 border-gray-100 focus:border-[#053B90] focus:ring-4 focus:ring-blue-50 outline-none transition-all text-black"
                       placeholder="00000 00000"
                     />
                   </div>
@@ -153,7 +153,7 @@ export default function Login() {
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full h-14 px-4 pr-12 rounded-xl border-2 border-gray-100 focus:border-[#053B90] focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                      className="w-full h-14 px-4 pr-12 rounded-xl border-2 border-gray-100 focus:border-[#053B90] focus:ring-4 focus:ring-blue-50 outline-none transition-all text-black"
                       placeholder="••••••••"
                     />
                     <button
